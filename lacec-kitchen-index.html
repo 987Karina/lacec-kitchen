@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Lacec Kitchen - Staff App</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --or:#d45a00;--orl:#fff3e8;
+  --gr:#1a7a4a;--grl:#e8f5ee;
+  --re:#c0392b;--rel:#fdecea;
+  --bl:#2980b9;--bll:#eaf4fb;
+  --go:#c49a1a;--gol:#fdf6e3;
+  --pu:#7d3c98;--pul:#f5eef8;
+  --gray:#f5f6fa;--bor:#dde1ea;
+  --txt:#1c2136;--mut:#7a8099;
+}
+html,body{height:100%;background:#f0f2f5;font-family:'Segoe UI',Arial,sans-serif;color:var(--txt);overscroll-behavior:none;}
+
+/* HEADER */
+.hdr{background:var(--or);color:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.hdr h1{font-size:1.1rem;font-weight:800;}
+.hdr .dt{font-size:0.78rem;opacity:0.9;}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:2px solid var(--bor);display:flex;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,0.08);}
+.bnav button{flex:1;padding:10px 4px 8px;background:none;border:none;font-size:0.65rem;font-weight:700;color:var(--mut);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all 0.2s;}
+.bnav button .ico{font-size:1.4rem;}
+.bnav button.active{color:var(--or);}
+.bnav button.active .ico{transform:scale(1.15);}
+
+/* MAIN */
+.main{padding:12px 12px 90px;max-width:500px;margin:0 auto;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* SECTION */
+.card{background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,0.06);}
+.card h2{font-size:1rem;font-weight:800;margin-bottom:12px;color:var(--txt);}
+.card h3{font-size:0.88rem;font-weight:700;margin-bottom:10px;color:var(--mut);}
+
+/* SUMMARY CARDS */
+.scards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.scard{background:white;border-radius:12px;padding:14px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.06);border-top:4px solid var(--or);}
+.scard.gr{border-top-color:var(--gr);}
+.scard.re{border-top-color:var(--re);}
+.scard.bl{border-top-color:var(--bl);}
+.scard label{font-size:0.68rem;color:var(--mut);text-transform:uppercase;font-weight:700;display:block;margin-bottom:4px;}
+.scard .val{font-size:1.3rem;font-weight:800;}
+.val.or{color:var(--or);}
+.val.gr{color:var(--gr);}
+.val.re{color:var(--re);}
+.val.bl{color:var(--bl);}
+
+/* ITEMS GRID - BIG TOUCH BUTTONS */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.icard{background:white;border:3px solid var(--bor);border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:all 0.15s;user-select:none;-webkit-user-select:none;active:scale(0.96);}
+.icard:active{transform:scale(0.95);background:var(--orl);}
+.icard.sel{border-color:var(--or);background:var(--orl);}
+.icard.low{border-color:var(--go);}
+.icard.out{opacity:0.35;pointer-events:none;}
+.icard .iname{font-size:0.88rem;font-weight:800;margin-bottom:4px;}
+.icard .iprice{font-size:1rem;font-weight:800;color:var(--or);}
+.icard .iunit{font-size:0.7rem;color:var(--mut);margin-top:2px;}
+.icard .istock{font-size:0.72rem;margin-top:4px;font-weight:700;}
+.icard .incart{font-size:0.75rem;color:var(--or);font-weight:800;margin-top:4px;background:var(--orl);border-radius:20px;padding:2px 8px;}
+
+/* CART */
+.cart-box{background:var(--orl);border:2px solid #f0c8a0;border-radius:14px;padding:14px;margin-bottom:14px;}
+.cart-box h3{font-size:0.9rem;font-weight:800;color:var(--or);margin-bottom:10px;}
+.ci{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0c8a0;}
+.ci:last-of-type{border-bottom:none;}
+.ci .cn{flex:1;font-size:0.88rem;font-weight:700;}
+.ci .cq{display:flex;align-items:center;gap:8px;}
+.ci .cq button{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;font-size:1.1rem;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--or);color:white;}
+.ci .cqn{font-size:1rem;font-weight:800;min-width:24px;text-align:center;}
+.ci .camt{font-size:0.9rem;font-weight:800;color:var(--or);min-width:70px;text-align:right;}
+.cart-total{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:2px solid #f0c8a0;font-size:1.1rem;font-weight:800;}
+
+/* BIG BUTTONS */
+.btn-big{width:100%;padding:16px;border:none;border-radius:14px;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all 0.15s;margin-bottom:10px;}
+.btn-big:active{transform:scale(0.97);}
+.btn-or{background:var(--or);color:white;}
+.btn-gr{background:var(--gr);color:white;}
+.btn-re{background:var(--re);color:white;}
+.btn-bl{background:var(--bl);color:white;}
+.btn-go{background:var(--go);color:white;}
+.btn-gy{background:var(--bor);color:var(--txt);}
+.btn-sm{padding:10px 16px;border:none;border-radius:10px;font-size:0.88rem;font-weight:700;cursor:pointer;}
+.btn-sm:active{transform:scale(0.96);}
+
+/* INPUTS - BIG FOR MOBILE */
+.finput{width:100%;border:2px solid var(--bor);border-radius:12px;padding:14px 16px;font-size:1.05rem;outline:none;margin-bottom:10px;-webkit-appearance:none;}
+.finput:focus{border-color:var(--or);}
+.finput.gold{border-color:var(--go);background:var(--gol);}
+select.finput{background:white;}
+.flabel{font-size:0.78rem;font-weight:700;color:var(--mut);text-transform:uppercase;margin-bottom:5px;display:block;}
+
+/* STOCK COUNT ITEMS */
+.sc-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--gray);border-radius:12px;margin-bottom:8px;}
+.sc-item .sname{font-size:0.9rem;font-weight:700;flex:1;}
+.sc-item input{width:90px;border:2px solid var(--bor);border-radius:10px;padding:10px 12px;font-size:1.1rem;font-weight:800;text-align:center;outline:none;-webkit-appearance:none;}
+.sc-item input:focus{border-color:var(--or);}
+
+/* METHOD TOGGLE */
+.mtoggle{display:flex;gap:8px;margin-bottom:14px;}
+.mtoggle button{flex:1;padding:12px;border:2px solid var(--bor);border-radius:12px;font-size:0.88rem;font-weight:700;cursor:pointer;background:white;color:var(--mut);transition:all 0.2s;}
+.mtoggle button.active{border-color:var(--or);background:var(--orl);color:var(--or);}
+
+/* CREDIT LIST */
+.cr-item{background:white;border-radius:12px;padding:14px;margin-bottom:10px;border-left:4px solid var(--re);box-shadow:0 1px 6px rgba(0,0,0,0.06);}
+.cr-item.paid{border-left-color:var(--gr);}
+.cr-item .crname{font-size:0.95rem;font-weight:800;margin-bottom:4px;}
+.cr-item .cramt{font-size:1.1rem;font-weight:800;color:var(--re);}
+.cr-item.paid .cramt{color:var(--gr);}
+.cr-item .crdet{font-size:0.78rem;color:var(--mut);margin-top:4px;}
+
+/* ALERT BOX */
+.alert{border-radius:12px;padding:13px 15px;margin-bottom:10px;font-size:0.88rem;font-weight:700;}
+.alert.warn{background:var(--rel);color:var(--re);}
+.alert.ok{background:var(--grl);color:var(--gr);}
+.alert.info{background:var(--bll);color:var(--bl);}
+
+/* DISC BOX */
+.disc-ok{background:var(--grl);border-radius:12px;padding:14px;text-align:center;font-size:1rem;font-weight:800;color:var(--gr);margin-bottom:10px;}
+.disc-warn{background:var(--rel);border-radius:12px;padding:14px;font-size:0.9rem;font-weight:700;color:var(--re);margin-bottom:10px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:24px;color:var(--mut);font-size:0.88rem;}
+
+/* SECTION DIVIDER */
+.divider{font-size:0.78rem;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:0.5px;margin:16px 0 8px;padding-left:4px;}
+
+/* HANDOVER INPUT */
+.handover-box{background:var(--gol);border-radius:14px;padding:16px;margin-bottom:14px;}
+.handover-box h3{font-size:0.95rem;font-weight:800;color:var(--go);margin-bottom:10px;}
+
+/* SUCCESS TOAST */
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a7a4a;color:white;padding:12px 24px;border-radius:30px;font-size:0.9rem;font-weight:700;z-index:999;display:none;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
+</style>
+</head>
+<body>
+
+<div id="toast">✅ Saved!</div>
+
+<div class="hdr">
+  <h1>🍽️ Lacec Kitchen</h1>
+  <span class="dt" id="hdrDate"></span>
+</div>
+
+<div class="main">
+
+<!-- ══════ HOME ══════ -->
+<div id="screen-home" class="screen active">
+  <div class="scards">
+    <div class="scard"><label>Sales Today</label><div class="val or" id="h-today">₦0</div></div>
+    <div class="scard gr"><label>Cash Expected</label><div class="val gr" id="h-expected">₦0</div></div>
+    <div class="scard re"><label>Discrepancy</label><div class="val re" id="h-disc">₦0</div></div>
+    <div class="scard bl"><label>Credit Owed</label><div class="val bl" id="h-credit">₦0</div></div>
+  </div>
+  <div id="home-alerts"></div>
+  <div class="divider">Quick Actions</div>
+  <button class="btn-big btn-or" onclick="showScreen('count')">📋 Morning / Evening Count</button>
+  <button class="btn-big btn-gr" onclick="showScreen('sell')">🛒 Record a Sale</button>
+  <button class="btn-big btn-bl" onclick="showScreen('credit-screen')">💳 Credit & Payments</button>
+  <button class="btn-big btn-go" onclick="showScreen('cashback')">🔄 Cashback</button>
+  <button class="btn-big" style="background:var(--pu);color:white" onclick="showScreen('market')">🛍️ Market Run</button>
+  <button class="btn-big btn-gy" onclick="showScreen('handover')">💰 Submit Cash</button>
+</div>
+
+<!-- ══════ STOCK COUNT ══════ -->
+<div id="screen-count" class="screen">
+  <button onclick="showScreen('home')" style="background:none;border:none;color:var(--or);font-weight:800;font-size:0.9rem;margin-bottom:12px;cursor:pointer">← Back</button>
+
+  <div class="mtoggle">
+    <button id="oc-toggle" class="active" onclick="setCountType('opening')">🌅 Morning Count</button>
+    <button id="cc-toggle" onclick="setCountType('closing')">🌆 Evening Count</button>
+  </div>
+
+  <div class="card">
+    <h2 id="count-title">🌅 Morning Opening Count</h2>
+    <p style="font-size:0.82rem;color:var(--mut);margin-bottom:14px" id="count-hint">Count every item before break time and enter the number here.</p>
+    <label class="flabel">Date</label>
+    <input type="date" id="count-date" class="finput">
+    <div id="count-grid"></div>
+    <button class="btn-big btn-or" onclick="saveCount()" style="margin-top:8px">💾 Save Count</button>
+  </div>
+
+  <!-- ACCOUNTABILITY -->
+  <div class="card" id="acc-card" style="display:none">
+    <h2>⚖️ Today's Check</h2>
+    <div id="acc-content"></div>
+  </div>
+</div>
+
+<!-- ══════ SELL ══════ -->
+<div id="screen-sell" class="screen">
+  <button onclick="showScreen('home')" style="background:none;border:none;color:var(--or);font-weight:800;font-size:0.9rem;margin-bottom:12px;cursor:pointer">← Back</button>
+
+  <div class="card">
+    <h2>🛒 New Sale</h2>
+    <label class="flabel">Date</label>
+    <input type="date" id="s-date" class="finput">
+    <label class="flabel">Payment Type</label>
+    <div class="mtoggle">
+      <button id="m-cash" class="active" onclick="setSaleMethod('Cash')">💵 Cash</button>
+      <button id="m-credit" onclick="setSaleMethod('Credit')">💳 Credit</button>
+    </div>
+    <div id="credit-name-wrap" style="display:none">
+      <label class="flabel">Customer Name</label>
+      <input type="text" id="s-cust" class="finput" placeholder="Who is buying on credit?">
+    </div>
+    <label class="flabel">Tap items to add:</label>
+  </div>
+
+  <div class="igrid" id="sell-grid"></div>
+
+  <div class="cart-box" id="sell-cart">
+    <h3>🛒 Cart</h3>
+    <div id="cart-items"><div class="empty">Tap items above to add them</div></div>
+    <div id="cart-total-row" style="display:none" class="cart-total">
+      <span>TOTAL</span><span style="color:var(--or)" id="cart-total-amt">₦0</span>
+    </div>
+  </div>
+
+  <button class="btn-big btn-or" onclick="recordSale()">✅ Complete Sale</button>
+  <button class="btn-big btn-gy" onclick="clearCart()">🗑 Clear Cart</button>
+</div>
+
+<!-- ══════ CREDIT ══════ -->
+<div id="screen-credit-screen" class="screen">
+  <button onclick="showScreen('home')" style="background:none;border:none;color:var(--or);font-weight:800;font-size:0.9rem;margin-bottom:12px;cursor:pointer">← Back</button>
+
+  <div class="card">
+    <h2>💳 Record Credit Payment</h2>
+    <p style="font-size:0.82rem;color:var(--mut);margin-bottom:12px">When someone pays back what they owe, enter it here.</p>
+    <label class="flabel">Customer Name</label>
+    <input type="text" id="cp-name" class="finput" placeholder="Who is paying back?">
+    <label class="flabel">Amount Paid (₦)</label>
+    <input type="number" id="cp-amt" class="finput" placeholder="0" inputmode="numeric">
+    <label class="flabel">Date</label>
+    <input type="date" id="cp-date" class="finput">
+    <button class="btn-big btn-gr" onclick="recordCreditPay()">✅ Record Payment</button>
+  </div>
+
+  <div class="divider">Who Owes Money</div>
+  <div id="credit-list"><div class="empty">No credit records yet.</div></div>
+</div>
+
+<!-- ══════ CASHBACK ══════ -->
+<div id="screen-cashback" class="screen">
+  <button onclick="showScreen('home')" style="background:none;border:none;color:var(--or);font-weight:800;font-size:0.9rem;margin-bottom:12px;cursor:pointer">← Back</button>
+
+  <div class="card">
+    <h2>🔄 Record Cashback</h2>
+    <p style="font-size:0.82rem;color:var(--mut);margin-bottom:12px">Customer transferred to school account. You gave them cash.</p>
+    <label class="flabel">Date</label>
+    <input type="date" id="cb-date" class="finput">
+    <label class="flabel">Customer Name</label>
+    <input type="text" id="cb-name" class="finput" placeholder="Customer name">
+    <label class="flabel">Amount They Transferred (₦)</label>
+    <input type="number" id="cb-trans" class="finput" placeholder="0" inputmode="numeric">
+    <label class="flabel">Cash You Gave Them (₦)</label>
+    <input type="number" id="cb-gave" class="finput" placeholder="0" inputmode="numeric">
+    <label class="flabel">Bank Reference (optional)</label>
+    <input type="text" id="cb-ref" class="finput" placeholder="e.g. GTBank ref no.">
+    <button class="btn-big btn-bl" onclick="addCashback()">✅ Record Cashback</button>
+  </div>
+
+  <div class="divider">Cashback Log Today</div>
+  <div id="cb-log"></div>
+</div>
+
+<!-- ══════ MARKET ══════ -->
+<div id="screen-market" class="screen">
+  <button onclick="showScreen('home')" style="background:none;border:none;color:var(--or);font-weight:800;font-size:0.9rem;margin-bottom:12px;cursor:pointer">← Back</button>
+
+  <div class="card">
+    <h2>🛍️ Record Market Run</h2>
+    <p style="font-size:0.82rem;color:var(--mut);margin-bottom:12px">Record everything you buy from the market. Keep your receipts!</p>
+    <label class="flabel">Date</label>
+    <input type="date" id="mk-date" class="finput">
+    <label class="flabel">What Did You Buy?</label>
+    <input type="text" id="mk-items" class="finput" placeholder="e.g. Flour, Oil, Sugar">
+    <label class="flabel">Total Amount Spent (₦)</label>
+    <input type="number" id="mk-cost" class="finput" placeholder="0" inputmode="numeric">
+    <label class="flabel">How Was It Paid?</label>
+    <select id="mk-method" class="finput">
+      <option>Cash from Till</option>
+      <option>Transfer from Owner</option>
+      <option>My Own Money (Reimburse Me)</option>
+    </select>
+    <label class="flabel">Did You Get a Receipt?</label>
+    <div class="mtoggle">
+      <button id="rcpt-yes" class="active" onclick="setReceipt('Yes')">✅ Yes</button>
+      <button id="rcpt-no" onclick="setReceipt('No')">❌ No</button>
+    </div>
+    <button class="btn-big btn-or" onclick="addMarket()">✅ Record Market Run</button>
+  </div>
+
+  <div class="divider">This Week's Market Runs</div>
+  <div id="mkt-log"></div>
+</div>
+
+<!-- ══════ HANDOVER ══════ -->
+<div id="screen-handover" class="screen">
+  <button onclick="showScreen('home')" style="background:none;border:none;color:var(--or);font-weight:800;font-size:0.9rem;margin-bottom:12px;cursor:pointer">← Back</button>
+
+  <div id="handover-summary"></div>
+
+  <div class="handover-box">
+    <h3>💰 Submit Cash Handover</h3>
+    <label class="flabel">Date</label>
+    <input type="date" id="ho-date" class="finput" style="background:white">
+    <label class="flabel">Cash You Are Handing Over (₦)</label>
+    <input type="number" id="ho-amt" class="finput gold" placeholder="Count your cash and enter total" inputmode="numeric" style="font-size:1.2rem;font-weight:800;">
+    <button class="btn-big btn-gr" onclick="submitHandover()">✅ Submit Handover</button>
+  </div>
+
+  <div id="handover-result"></div>
+</div>
+
+</div><!-- /main -->
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="active" id="nav-home" onclick="showScreen('home',this)"><span class="ico">🏠</span>Home</button>
+  <button id="nav-count" onclick="showScreen('count',this)"><span class="ico">📋</span>Count</button>
+  <button id="nav-sell" onclick="showScreen('sell',this)"><span class="ico">🛒</span>Sell</button>
+  <button id="nav-credit-screen" onclick="showScreen('credit-screen',this)"><span class="ico">💳</span>Credit</button>
+  <button id="nav-handover" onclick="showScreen('handover',this)"><span class="ico">💰</span>Cash</button>
+</nav>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const DEFAULT_ITEMS=[
+  {id:'fish-roll',name:'Fish Roll',price:100,unit:'1 piece',stock:0,low:10},
+  {id:'puff-puff',name:'Puff Puff',price:50,unit:'1 piece',stock:0,low:15},
+  {id:'scotch-egg',name:'Scotch Egg',price:150,unit:'1 piece',stock:0,low:5},
+  {id:'buns',name:'Buns',price:50,unit:'1 piece',stock:0,low:15},
+  {id:'fish-pie',name:'Fish Pie',price:100,unit:'1 piece',stock:0,low:10},
+  {id:'popcorn',name:'Popcorn',price:100,unit:'1 pack',stock:0,low:5},
+  {id:'pancake',name:'Pancake',price:150,unit:'1 piece',stock:0,low:5},
+  {id:'boiled-egg',name:'Boiled Egg',price:100,unit:'1 egg',stock:0,low:5},
+  {id:'peanuts',name:'Peanuts',price:50,unit:'1 pack',stock:0,low:10},
+  {id:'chin-chin',name:'Chin Chin',price:100,unit:'1 pack',stock:0,low:5},
+  {id:'groundnut',name:'Groundnut',price:50,unit:'1 pack',stock:0,low:10},
+  {id:'sm-biscuit',name:'Small Biscuit',price:50,unit:'1 pack',stock:0,low:10},
+  {id:'big-biscuit',name:'Big Biscuit',price:100,unit:'1 pack',stock:0,low:5},
+  {id:'sm-sweet',name:'Small Sweet',price:50,unit:'2 pieces',stock:0,low:20},
+  {id:'stick-sweet',name:'Stick Sweet',price:50,unit:'1 stick',stock:0,low:10},
+  {id:'sm-drink',name:'Small Drink',price:150,unit:'1 bottle',stock:0,low:10},
+  {id:'big-drink',name:'Big Drink',price:300,unit:'1 bottle',stock:0,low:5},
+  {id:'zobo',name:'Zobo',price:100,unit:'1 cup',stock:0,low:10},
+  {id:'pure-water',name:'Pure Water',price:20,unit:'1 sachet',stock:0,low:20},
+  {id:'bottle-water',name:'Bottle Water',price:150,unit:'1 bottle',stock:0,low:10},
+  {id:'rice',name:'Rice',price:500,unit:'1 plate',stock:0,low:5},
+  {id:'meat',name:'Meat',price:300,unit:'1 piece',stock:0,low:5},
+  {id:'garri-soup',name:'Garri & Soup',price:300,unit:'1 plate',stock:0,low:5},
+  {id:'extra',name:'Extra',price:100,unit:'1 serving',stock:0,low:5},
+];
+
+let D={items:[],sales:[],credit:[],creditPayments:[],cashback:[],market:[],stockCounts:[],handovers:[]};
+let cart=[];
+let saleMethod='Cash';
+let countType='opening';
+let receiptStatus='Yes';
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+function init(){
+  // Try to load from full kitchen system first
+  const full=localStorage.getItem('lacec_kitchen_v2');
+  if(full){
+    const fd=JSON.parse(full);
+    D.items=fd.items||[];
+    D.sales=fd.sales||[];
+    D.credit=fd.credit||[];
+    D.creditPayments=fd.creditPayments||[];
+    D.cashback=fd.cashback||[];
+    D.market=fd.market||[];
+    D.stockCounts=fd.stockCounts||[];
+    D.handovers=fd.handovers||[];
+  } else {
+    const saved=localStorage.getItem('lacec_kitchen_mobile');
+    if(saved) D=JSON.parse(saved);
+  }
+  DEFAULT_ITEMS.forEach(d=>{if(!D.items.find(i=>i.id===d.id))D.items.push({...d});});
+
+  const today=new Date().toISOString().split('T')[0];
+  ['count-date','s-date','cb-date','mk-date','ho-date','cp-date'].forEach(id=>sv(id,today));
+
+  document.getElementById('hdrDate').textContent=new Date().toLocaleDateString('en-NG',{weekday:'short',day:'numeric',month:'short'});
+
+  renderAll();
+}
+
+function save(){
+  localStorage.setItem('lacec_kitchen_mobile',JSON.stringify(D));
+  // Also sync to full system
+  try{
+    const full=localStorage.getItem('lacec_kitchen_v2');
+    if(full){
+      const fd=JSON.parse(full);
+      fd.items=D.items; fd.sales=D.sales; fd.credit=D.credit;
+      fd.creditPayments=D.creditPayments; fd.cashback=D.cashback;
+      fd.market=D.market; fd.stockCounts=D.stockCounts; fd.handovers=D.handovers;
+      localStorage.setItem('lacec_kitchen_v2',JSON.stringify(fd));
+    }
+  }catch(e){}
+  renderAll();
+}
+
+function renderAll(){
+  renderHome();
+  renderSellGrid();
+  renderCountGrid();
+  renderCreditList();
+  renderCbLog();
+  renderMktLog();
+  renderHandoverSummary();
+  renderCart();
+}
+
+function gv(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function sv(id,v){const e=document.getElementById(id);if(e)e.value=v;}
+function st(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function n(v){return Number(v)||0;}
+function fmt(v){return '₦'+n(v).toLocaleString('en-NG');}
+function fmtD(d){return d?new Date(d+'T00:00').toLocaleDateString('en-NG',{day:'2-digit',month:'short'}):'—';}
+
+function toast(msg='✅ Saved!'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showScreen(name, btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  const nb=document.getElementById('nav-'+name);
+  if(nb) nb.classList.add('active');
+  window.scrollTo(0,0);
+  if(name==='handover') renderHandoverSummary();
+  if(name==='count') renderAccountability();
+}
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+function renderHome(){
+  const today=new Date().toISOString().slice(0,10);
+  const todaySales=D.sales.filter(s=>s.date===today);
+  const todayTotal=todaySales.reduce((s,r)=>s+n(r.total),0);
+  const creditOut=getCreditOut();
+
+  const oc=D.stockCounts.find(c=>c.date===today&&c.type==='opening');
+  const cc=D.stockCounts.find(c=>c.date===today&&c.type==='closing');
+  const handover=D.handovers.find(h=>h.date===today);
+  const cashbackGiven=D.cashback.filter(c=>c.date===today).reduce((s,r)=>s+n(r.gave),0);
+  const mktCash=D.market.filter(m=>m.date===today&&m.method==='Cash from Till').reduce((s,r)=>s+n(r.cost),0);
+  let expected=null,disc=0;
+  if(oc&&cc){expected=calcExpected(oc,cc)-cashbackGiven-mktCash;if(handover)disc=Math.abs(expected-n(handover.amount));}
+
+  st('h-today',fmt(todayTotal));
+  st('h-expected',expected!==null?fmt(expected):'Count first');
+  st('h-disc',fmt(disc));
+  st('h-credit',fmt(creditOut));
+
+  const alerts=[];
+  if(!oc) alerts.push({t:'info',m:'📋 Morning count not done yet — please count items first!'});
+  if(creditOut>0) alerts.push({t:'warn',m:`💳 ${fmt(creditOut)} in unpaid credit.`});
+  const outItems=D.items.filter(i=>n(i.stock)===0);
+  if(outItems.length) alerts.push({t:'warn',m:`🚨 Out of stock: ${outItems.slice(0,3).map(i=>i.name).join(', ')}`});
+  if(disc>0&&handover) alerts.push({t:'warn',m:`🚨 Cash discrepancy of ${fmt(disc)} today!`});
+
+  const ab=document.getElementById('home-alerts');
+  ab.innerHTML=alerts.map(a=>`<div class="alert ${a.t}">${a.m}</div>`).join('');
+}
+
+function getCreditOut(){
+  const totals={};
+  D.credit.forEach(c=>{totals[c.customer]=(totals[c.customer]||0)+n(c.amount);});
+  D.creditPayments.forEach(p=>{totals[p.customer]=(totals[p.customer]||0)-n(p.amount);});
+  return Object.values(totals).filter(v=>v>0).reduce((s,v)=>s+v,0);
+}
+
+function calcExpected(oc,cc){
+  let total=0;
+  D.items.forEach(item=>{
+    const open=n(oc.counts[item.id]);
+    const close=n(cc.counts[item.id]);
+    total+=Math.max(0,open-close)*n(item.price);
+  });
+  return total;
+}
+
+// ══════════════════════════════════════════
+// STOCK COUNT
+// ══════════════════════════════════════════
+function setCountType(type){
+  countType=type;
+  document.getElementById('oc-toggle').className=type==='opening'?'active':'';
+  document.getElementById('cc-toggle').className=type==='closing'?'active':'';
+  document.getElementById('count-title').textContent=type==='opening'?'🌅 Morning Opening Count':'🌆 Evening Closing Count';
+  document.getElementById('count-hint').textContent=type==='opening'?'Count every item before break time starts.':'Count every item remaining at end of day.';
+  renderCountGrid();
+}
+
+function renderCountGrid(){
+  const grid=document.getElementById('count-grid');
+  if(!grid)return;
+  grid.innerHTML=D.items.map(item=>`
+    <div class="sc-item">
+      <div class="sname">${item.name}<br><span style="font-size:0.7rem;color:var(--mut)">${item.unit}</span></div>
+      <input type="number" id="cnt-${item.id}" placeholder="0" inputmode="numeric" min="0">
+    </div>`).join('');
+}
+
+function saveCount(){
+  const date=gv('count-date');
+  if(!date){alert('Please select a date.');return;}
+  const counts={};
+  D.items.forEach(item=>{
+    const el=document.getElementById('cnt-'+item.id);
+    counts[item.id]=n(el?el.value:0);
+  });
+  D.stockCounts=D.stockCounts.filter(c=>!(c.date===date&&c.type===countType));
+  D.stockCounts.push({date,type:countType,counts,id:Date.now()});
+  if(countType==='opening'){D.items.forEach(item=>{item.stock=counts[item.id];});}
+  save();
+  toast(countType==='opening'?'✅ Morning count saved!':'✅ Evening count saved!');
+  renderAccountability();
+}
+
+function renderAccountability(){
+  const date=gv('count-date')||new Date().toISOString().split('T')[0];
+  const oc=D.stockCounts.find(c=>c.date===date&&c.type==='opening');
+  const cc=D.stockCounts.find(c=>c.date===date&&c.type==='closing');
+  const card=document.getElementById('acc-card');
+  const content=document.getElementById('acc-content');
+  if(!oc&&!cc){card.style.display='none';return;}
+  card.style.display='block';
+  const cashbackGiven=D.cashback.filter(c=>c.date===date).reduce((s,r)=>s+n(r.gave),0);
+  const mktCash=D.market.filter(m=>m.date===date&&m.method==='Cash from Till').reduce((s,r)=>s+n(r.cost),0);
+  const expected=oc&&cc?calcExpected(oc,cc):null;
+  const adjusted=expected!==null?expected-cashbackGiven-mktCash:null;
+  const handover=D.handovers.find(h=>h.date===date);
+  let rows='';
+  if(oc&&cc){
+    D.items.forEach(item=>{
+      const open=n(oc.counts[item.id]);
+      const close=n(cc.counts[item.id]);
+      const sold=Math.max(0,open-close);
+      if(open>0||sold>0) rows+=`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bor);font-size:0.85rem"><span style="font-weight:600">${item.name}</span><span>${open}→${close} = <strong>${sold} sold</strong></span></div>`;
+    });
+  }
+  const disc=adjusted!==null&&handover?Math.abs(adjusted-n(handover.amount)):null;
+  content.innerHTML=`
+    ${rows?`<div style="margin-bottom:12px">${rows}</div>`:''}
+    ${adjusted!==null?`<div style="background:var(--orl);border-radius:10px;padding:12px;margin-bottom:10px"><div style="font-size:0.78rem;color:var(--mut);text-transform:uppercase;margin-bottom:4px">Cash Expected Today</div><div style="font-size:1.4rem;font-weight:800;color:var(--or)">${fmt(adjusted)}</div>${cashbackGiven>0?`<div style="font-size:0.78rem;color:var(--bl)">Cashback given: ${fmt(cashbackGiven)}</div>`:''}${mktCash>0?`<div style="font-size:0.78rem;color:var(--pu)">Market cash used: ${fmt(mktCash)}</div>`:''}</div>`:'<div class="alert info">Complete both morning and evening count to see expected cash.</div>'}
+    ${disc!==null?disc===0?'<div class="disc-ok">✅ Cash balances perfectly!</div>':`<div class="disc-warn">🚨 Discrepancy: ${fmt(disc)}<br><small>Expected ${fmt(adjusted)} but ${fmt(n(handover.amount))} was submitted.</small></div>`:''}`;
+}
+
+// ══════════════════════════════════════════
+// SALES
+// ══════════════════════════════════════════
+function setSaleMethod(m){
+  saleMethod=m;
+  document.getElementById('m-cash').className=m==='Cash'?'active':'';
+  document.getElementById('m-credit').className=m==='Credit'?'active':'';
+  document.getElementById('credit-name-wrap').style.display=m==='Credit'?'block':'none';
+}
+
+function renderSellGrid(){
+  const grid=document.getElementById('sell-grid');
+  if(!grid)return;
+  grid.innerHTML=D.items.map(item=>{
+    const s=n(item.stock),isOut=s===0,isLow=s>0&&s<=n(item.low);
+    const inCart=cart.find(c=>c.id===item.id);
+    return `<div class="icard ${isLow?'low':''} ${isOut?'out':''} ${inCart?'sel':''}" onclick="addToCart('${item.id}')">
+      <div class="iname">${item.name}</div>
+      <div class="iprice">${fmt(item.price)}</div>
+      <div class="iunit">${item.unit}</div>
+      <div class="istock" style="color:${isOut?'var(--re)':isLow?'var(--go)':'var(--mut)'}">${isOut?'❌ OUT':isLow?`⚠️ Low: ${s}`:`Stock: ${s}`}</div>
+      ${inCart?`<div class="incart">In cart: ${inCart.qty}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function addToCart(itemId){
+  const item=D.items.find(i=>i.id===itemId);
+  if(!item||n(item.stock)===0)return;
+  const ex=cart.find(c=>c.id===itemId);
+  if(ex){if(ex.qty>=n(item.stock)){alert(`Only ${item.stock} left!`);return;}ex.qty++;}
+  else cart.push({id:item.id,name:item.name,qty:1,price:n(item.price),unit:item.unit});
+  renderCart();renderSellGrid();
+}
+
+function changeQty(itemId,delta){
+  const idx=cart.findIndex(c=>c.id===itemId);
+  if(idx===-1)return;
+  cart[idx].qty+=delta;
+  if(cart[idx].qty<=0)cart.splice(idx,1);
+  renderCart();renderSellGrid();
+}
+
+function clearCart(){
+  cart=[];
+  sv('s-cust','');
+  renderCart();renderSellGrid();
+}
+
+function renderCart(){
+  const ci=document.getElementById('cart-items');
+  const ct=document.getElementById('cart-total-row');
+  if(!ci||!ct)return;
+  if(!cart.length){ci.innerHTML='<div class="empty">Tap items above to add them</div>';ct.style.display='none';return;}
+  const total=cart.reduce((s,c)=>s+c.qty*c.price,0);
+  ci.innerHTML=cart.map(c=>`
+    <div class="ci">
+      <div class="cn">${c.name}</div>
+      <div class="cq">
+        <button onclick="changeQty('${c.id}',-1)">−</button>
+        <span class="cqn">${c.qty}</span>
+        <button onclick="changeQty('${c.id}',1)">+</button>
+      </div>
+      <div class="camt">${fmt(c.qty*c.price)}</div>
+    </div>`).join('');
+  ct.style.display='flex';
+  st('cart-total-amt',fmt(total));
+}
+
+function recordSale(){
+  if(!cart.length){alert('Cart is empty!');return;}
+  if(saleMethod==='Credit'&&!gv('s-cust')){alert('Please enter customer name for credit sale.');return;}
+  const total=cart.reduce((s,c)=>s+c.qty*c.price,0);
+  cart.forEach(c=>{const item=D.items.find(i=>i.id===c.id);if(item)item.stock=Math.max(0,n(item.stock)-c.qty);});
+  const sale={id:Date.now(),date:gv('s-date'),time:new Date().toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}),items:cart.map(c=>({...c})),total,method:saleMethod,customer:saleMethod==='Credit'?gv('s-cust'):'',by:'Sales Girl'};
+  D.sales.push(sale);
+  if(saleMethod==='Credit'){
+    D.credit.push({id:Date.now()+1,date:gv('s-date'),customer:gv('s-cust'),items:cart.map(c=>`${c.name} x${c.qty}`).join(', '),amount:total});
+  }
+  clearCart();save();
+  toast(`✅ Sale recorded! ${fmt(total)}`);
+}
+
+// ══════════════════════════════════════════
+// CREDIT
+// ══════════════════════════════════════════
+function recordCreditPay(){
+  const name=gv('cp-name'),amt=n(gv('cp-amt'));
+  if(!name||!amt){alert('Please fill in name and amount.');return;}
+  D.creditPayments.push({id:Date.now(),date:gv('cp-date'),customer:name,amount:amt,by:'Sales Girl'});
+  sv('cp-name','');sv('cp-amt','');
+  save();toast('✅ Payment recorded!');
+  renderCreditList();
+}
+
+function renderCreditList(){
+  const el=document.getElementById('credit-list');
+  if(!el)return;
+  const balances={};
+  D.credit.forEach(c=>{
+    if(!balances[c.customer])balances[c.customer]={total:0,items:[],dates:[]};
+    balances[c.customer].total+=n(c.amount);
+    balances[c.customer].items.push(c.items);
+    balances[c.customer].dates.push(c.date);
+  });
+  D.creditPayments.forEach(p=>{if(balances[p.customer])balances[p.customer].total-=n(p.amount);});
+  const entries=Object.entries(balances).filter(([,v])=>v.total>0).sort((a,b)=>b[1].total-a[1].total);
+  if(!entries.length){el.innerHTML='<div class="empty">No outstanding credit. 🎉</div>';return;}
+  el.innerHTML=entries.map(([name,v])=>`
+    <div class="cr-item ${v.total<=0?'paid':''}">
+      <div class="crname">👤 ${name}</div>
+      <div class="cramt">${fmt(Math.max(0,v.total))} owing</div>
+      <div class="crdet">Last purchase: ${fmtD(v.dates[v.dates.length-1])}</div>
+      <div class="crdet" style="margin-top:2px">${v.items[v.items.length-1]}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// CASHBACK
+// ══════════════════════════════════════════
+function addCashback(){
+  const gave=n(gv('cb-gave'));
+  if(!gave){alert('Please enter cash given amount.');return;}
+  D.cashback.push({id:Date.now(),date:gv('cb-date'),name:gv('cb-name'),transferred:n(gv('cb-trans')),gave,ref:gv('cb-ref')});
+  ['cb-name','cb-trans','cb-gave','cb-ref'].forEach(id=>sv(id,''));
+  save();toast('✅ Cashback recorded!');
+}
+
+function renderCbLog(){
+  const today=new Date().toISOString().split('T')[0];
+  const el=document.getElementById('cb-log');
+  if(!el)return;
+  const rows=D.cashback.filter(c=>c.date===today).slice().reverse();
+  if(!rows.length){el.innerHTML='<div class="empty">No cashback recorded today.</div>';return;}
+  el.innerHTML=rows.map(r=>`<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;border-left:4px solid var(--bl);box-shadow:0 1px 6px rgba(0,0,0,0.05)">
+    <div style="font-weight:700">${r.name||'Customer'}</div>
+    <div style="font-size:0.85rem;color:var(--mut)">Transferred: <strong style="color:var(--gr)">${fmt(r.transferred)}</strong> | Cash given: <strong style="color:var(--re)">${fmt(r.gave)}</strong></div>
+    ${r.ref?`<div style="font-size:0.78rem;color:var(--mut)">${r.ref}</div>`:''}
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// MARKET
+// ══════════════════════════════════════════
+function setReceipt(val){
+  receiptStatus=val;
+  document.getElementById('rcpt-yes').className=val==='Yes'?'active':'';
+  document.getElementById('rcpt-no').className=val==='No'?'active':'';
+}
+
+function addMarket(){
+  const cost=n(gv('mk-cost'));
+  if(!cost){alert('Please enter amount spent.');return;}
+  D.market.push({id:Date.now(),date:gv('mk-date'),items:gv('mk-items'),cost,method:gv('mk-method'),receipt:receiptStatus,by:'Sales Girl'});
+  ['mk-items','mk-cost'].forEach(id=>sv(id,''));
+  save();toast('✅ Market run recorded!');
+}
+
+function renderMktLog(){
+  const el=document.getElementById('mkt-log');
+  if(!el)return;
+  const today=new Date().toISOString().split('T')[0];
+  const mon=getMonday(today);
+  const dates=getWeekDates(mon);
+  const rows=D.market.filter(m=>dates.includes(m.date)).slice().reverse();
+  const total=rows.reduce((s,r)=>s+n(r.cost),0);
+  if(!rows.length){el.innerHTML='<div class="empty">No market runs this week.</div>';return;}
+  el.innerHTML=rows.map(r=>`<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;border-left:4px solid var(--pu);box-shadow:0 1px 6px rgba(0,0,0,0.05)">
+    <div style="font-weight:700">${r.items||'Market Run'}</div>
+    <div style="font-size:0.9rem;color:var(--pu);font-weight:800">${fmt(r.cost)}</div>
+    <div style="font-size:0.78rem;color:var(--mut)">${fmtD(r.date)} | ${r.method} | Receipt: <strong style="color:${r.receipt==='Yes'?'var(--gr)':'var(--re)'}">${r.receipt}</strong></div>
+  </div>`).join('')+`<div style="padding:10px;text-align:center;font-weight:800;color:var(--pu)">Total this week: ${fmt(total)}</div>`;
+}
+
+// ══════════════════════════════════════════
+// HANDOVER
+// ══════════════════════════════════════════
+function renderHandoverSummary(){
+  const today=new Date().toISOString().split('T')[0];
+  const el=document.getElementById('handover-summary');
+  if(!el)return;
+  const oc=D.stockCounts.find(c=>c.date===today&&c.type==='opening');
+  const cc=D.stockCounts.find(c=>c.date===today&&c.type==='closing');
+  const cashbackGiven=D.cashback.filter(c=>c.date===today).reduce((s,r)=>s+n(r.gave),0);
+  const mktCash=D.market.filter(m=>m.date===today&&m.method==='Cash from Till').reduce((s,r)=>s+n(r.cost),0);
+  const adjusted=oc&&cc?calcExpected(oc,cc)-cashbackGiven-mktCash:null;
+  el.innerHTML=`
+    <div style="background:white;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,0.06)">
+      <div style="font-size:0.78rem;color:var(--mut);text-transform:uppercase;margin-bottom:8px">Today's Summary</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><div style="font-size:0.72rem;color:var(--mut)">Cash Sales</div><div style="font-size:1.1rem;font-weight:800;color:var(--or)">${fmt(D.sales.filter(s=>s.date===today&&s.method==='Cash').reduce((s,r)=>s+n(r.total),0))}</div></div>
+        <div><div style="font-size:0.72rem;color:var(--mut)">Cashback Given</div><div style="font-size:1.1rem;font-weight:800;color:var(--re)">-${fmt(cashbackGiven)}</div></div>
+        <div><div style="font-size:0.72rem;color:var(--mut)">Market Cash Used</div><div style="font-size:1.1rem;font-weight:800;color:var(--pu)">-${fmt(mktCash)}</div></div>
+        <div><div style="font-size:0.72rem;color:var(--mut)">You Should Hand Over</div><div style="font-size:1.2rem;font-weight:800;color:var(--gr)">${adjusted!==null?fmt(Math.max(0,adjusted)):'Count first'}</div></div>
+      </div>
+    </div>`;
+  sv('ho-date',today);
+}
+
+function submitHandover(){
+  const date=gv('ho-date'),amount=n(gv('ho-amt'));
+  if(!amount){alert('Please enter the cash amount.');return;}
+  D.handovers=D.handovers.filter(h=>h.date!==date);
+  D.handovers.push({date,amount,id:Date.now()});
+  sv('ho-amt','');
+  save();
+
+  const oc=D.stockCounts.find(c=>c.date===date&&c.type==='opening');
+  const cc=D.stockCounts.find(c=>c.date===date&&c.type==='closing');
+  const cashbackGiven=D.cashback.filter(c=>c.date===date).reduce((s,r)=>s+n(r.gave),0);
+  const mktCash=D.market.filter(m=>m.date===date&&m.method==='Cash from Till').reduce((s,r)=>s+n(r.cost),0);
+  const expected=oc&&cc?calcExpected(oc,cc)-cashbackGiven-mktCash:null;
+  const disc=expected!==null?Math.abs(expected-amount):null;
+  const el=document.getElementById('handover-result');
+  if(el){
+    el.innerHTML=disc===null?'<div class="alert ok">✅ Handover recorded!</div>':
+      disc===0?'<div class="disc-ok">✅ Cash balances perfectly! Well done!</div>':
+      `<div class="disc-warn">⚠️ There is a difference of ${fmt(disc)}.<br>Expected: ${fmt(expected)}<br>Submitted: ${fmt(amount)}<br>Please recount your cash.</div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+function getMonday(dateStr){
+  const d=new Date(dateStr+'T00:00');
+  const day=d.getDay();
+  const diff=day===0?-6:1-day;
+  d.setDate(d.getDate()+diff);
+  return d.toISOString().split('T')[0];
+}
+
+function getWeekDates(monday){
+  const dates=[];
+  const d=new Date(monday+'T00:00');
+  for(let i=0;i<5;i++){
+    const dd=new Date(d);dd.setDate(d.getDate()+i);
+    dates.push(dd.toISOString().split('T')[0]);
+  }
+  return dates;
+}
+
+init();
+</script>
+</body>
+</html>
